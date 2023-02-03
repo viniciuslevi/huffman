@@ -307,6 +307,34 @@ void compactar(unsigned char *str){
         printf("\n\nErro ao abrir/crair arquivo em compactar\n");
     }
 }
+
+// ------------------ parte 8: Descompactar --------------------
+unsigned int eh_bit_um(unsigned char byte, int i){
+    unsigned char mascara = (1 << i);
+    return byte & mascara;
+}
+void descompactar(NODE *raiz){
+    int i;
+    NODE *aux = raiz;
+    FILE *file = fopen("compactado.cpt", "rb");
+    if(file){
+        while(fread(&byte, sizeof(unsigned char), 1, file)){
+            for(i = 7; i >= 0; i--){
+                if(eh_bit_um(byte, i))
+                    aux = aux->right;
+                else
+                    aux = aux->left;
+            }
+            if(!aux->left && !aux->right){
+                printf("%c",aux->caracter);
+                aux = raiz;
+            }
+        }
+        fclose(file);
+    } else{
+        printf("\nErro ao abrir arquivo em desccompactar\n")
+    }
+}
 int main(void)
 {
     unsigned char text[] = "teste";
@@ -350,5 +378,5 @@ int main(void)
 
     // 7 -- Criar arquivo COMPACTADO
 
-
+    // 8 -- Lendo arquivo COMPACTADO
 }
