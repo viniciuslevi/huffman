@@ -220,16 +220,42 @@ void imprime_dicionario(char **dicionario){
     int i;
     printf("\tDicionario:\n");
     for(i=0 ; i<TAM ; i++){
-        if(strlen(dicionario[i])>0)
+        if(strlen(dicionario[i]) > 0)
         printf("\t%3d %s\n", i, dicionario[i]);
     }
 }
+// -------------------------- PARTE 5: Codificar -----------------------
+
+int calcula_tamanho_string(char ** dicionario, char *texto){
+    int i=0, tam = 0;
+    while(texto[i] != '\0'){
+        tam = tam + strlen(dicionario[texto[i++]]);
+    }
+    return tam+1;
+}
+char * codificar(char ** dicionario, unsigned char *texto){
+
+    int i=0, tam = calcula_tamanho_string(dicionario, texto);
+
+    char *codigo = calloc(tam, sizeof(char));
+    if(!codigo){
+        printf("Nao foi possivel alocar espaco");
+        return;
+    }
+
+    while(texto[i] != '\0'){
+        strcat(codigo, dicionario[texto[i++]]);
+    }
+    return codigo;
+}
+
 int main(void)
 {
     unsigned char text[] = "teste";
     unsigned int tabela_frequencia[TAM];
     char **dicionario;
     int colunas;
+    char *codificado;
 
     // 1 -- tabela de frequencia
     inicializa_tabela_com_zero(&tabela_frequencia);
@@ -253,4 +279,8 @@ int main(void)
     dicionario = aloca_dicionario(colunas);
     gerar_dicionario(dicionario, arvore, "", colunas);
     imprime_dicionario(dicionario);
+
+    // 5 -- Codificando o texto
+    codificado = codificar(dicionario, text);
+    printf("\n\tTexto codificado: %s\n", codificado);
 }
