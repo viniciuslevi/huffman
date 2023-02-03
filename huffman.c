@@ -233,7 +233,7 @@ int calcula_tamanho_string(char ** dicionario, char *texto){
     }
     return tam+1;
 }
-char * codificar(char ** dicionario, unsigned char *texto){
+char *codificar(char ** dicionario, unsigned char *texto){
 
     int i=0, tam = calcula_tamanho_string(dicionario, texto);
 
@@ -249,6 +249,34 @@ char * codificar(char ** dicionario, unsigned char *texto){
     return codigo;
 }
 
+// --------------------- PARTE 6: Decodificacao ----------------------
+char *decodificar(unsigned char texto[], NODE *raiz){
+    int i=0;
+    NODE *aux = raiz;
+    char temp[2];
+    char *decodificado = calloc(strlen(texto), sizeof(char));
+   
+    if(!decodificado){
+        printf("\nnao foi possivel alocar espaco");
+        return;
+    }
+    while(texto[i]){
+        if(texto[i++] == '0'){
+            aux = aux->left;
+        }else{
+            aux = aux->right;
+        }
+        //verificar se chegou numa letra
+        if(!aux->left && !aux->right){
+            temp[0] = aux->caracter;
+            temp[1] = '\0';
+            strcat(decodificado, temp);
+            aux = raiz;
+        }
+    }
+    return decodificado;
+}
+
 int main(void)
 {
     unsigned char text[] = "teste";
@@ -256,6 +284,7 @@ int main(void)
     char **dicionario;
     int colunas;
     char *codificado;
+    char *decodificado;
 
     // 1 -- tabela de frequencia
     inicializa_tabela_com_zero(&tabela_frequencia);
@@ -283,4 +312,8 @@ int main(void)
     // 5 -- Codificando o texto
     codificado = codificar(dicionario, text);
     printf("\n\tTexto codificado: %s\n", codificado);
+
+    // 6 -- Decodificando o texto
+    decodificado = decodificar(codificado, arvore);
+    printf("\n\tTexto decodificado: %s\n", decodificado);
 }
