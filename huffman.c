@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <string.h>
 #define TAM 256
 
 // ESTRUTURA fila ORDENADA
@@ -165,11 +165,71 @@ void imprimir_arvore(NODE *raiz, int tam){
         imprimir_arvore(raiz->right, tam + 1);
     }
 }
+// ------------------  PARTE 4: Montar dicionario ------------------
 
+int altura_arvore(NODE *raiz){
+    int left, right;
+    if(!raiz)
+        return -1;
+    else{
+        left = altura_arvore(raiz->left) + 1;
+        right = altura_arvore(raiz->right) + 1;
+        if(left > right)
+            return left;
+        else
+            return right;
+    }
+}
+
+char ** aloca_dicionario(int colunas){
+    int i;
+    char ** dicionario;
+
+    dicionario = malloc(sizeof(char*) * TAM);
+    if(!dicionario){
+        printf("\n\tNao foi possivel alocar espaço");
+        return;
+    }else{
+        for( i=0 ; i<TAM ; i++){
+            dicionario[i] = calloc(colunas, sizeof(char));
+            if(!dicionario[i]){
+                printf("\n\t Nao foi possivel alocar espaco");
+                return;
+            }
+        }
+        return dicionario;    
+    }
+}
+void gerar_dicionario(char **dicionario, NODE *raiz, char *caminho, int colunas){
+    char esquerda[colunas], direita[colunas];
+    if(raiz->left == NULL && raiz->right == NULL){
+        strcpy(dicionario[raiz->caracter], caminho);
+    }else{
+        strcpy(esquerda, caminho);
+        strcpy(direita, caminho);
+
+        strcat(esquerda, "0");
+        strcat(direita, "1");
+
+        gerar_dicionario(dicionario, raiz->left, esquerda, colunas);
+        gerar_dicionario(dicionario, raiz->right, direita, colunas);
+
+    }
+}
+void imprime_dicionario(char **dicionario){
+    int i;
+    printf("\tDicionario:\n");
+    for(i=0 ; i<TAM ; i++){
+        if(strlen(dicionario[i])>0)
+        printf("\t%3d %s\n", i, dicionario[i]);
+    }
+}
 int main(void)
 {
     unsigned char text[] = "teste";
     unsigned int tabela_frequencia[TAM];
+    char **dicionario;
+    int colunas;
 
     // 1 -- tabela de frequencia
     inicializa_tabela_com_zero(&tabela_frequencia);
@@ -188,4 +248,9 @@ int main(void)
     printf("\n\tImprimindo arvore de huffman\n");
     imprimir_arvore(arvore, 0);
 
+    // 4 -- Montagem do dicionario para o algoritmo
+    colunas = altura_arvore(arvore)+1;
+    dicionario = aloca_dicionario(colunas);
+    gerar_dicionario(dicionario, arvore, "", colunas);
+    imprime_dicionario(dicionario);
 }
