@@ -276,7 +276,37 @@ char *decodificar(unsigned char texto[], NODE *raiz){
     }
     return decodificado;
 }
+// ------------------- PARTE 7 : Compactar ----------------
 
+void compactar(unsigned char *str){
+    int i=0, j=7;
+    unsigned char mascara, byte = 0;
+    FILE *file = fopen("compactado.cpt", "wb");
+    
+    if(file){
+        while(str[i]){
+            mascara = 1;
+            if(str[i++] == '1'){
+                mascara = mascara << j;
+                byte = byte | mascara;
+            }
+            j--;
+
+            if(j < 0){ // depois de manipular o byte de forma a formar o codigo parecido com o da string. Em seguida, mandamos o byte formado para o arquivo e reiniciamos o processo em busca de gerar o proximo byte.
+                fwrite(&byte, sizeof(unsigned char), 1, file);
+                
+                byte = 0;
+                j = 7;
+            }
+            if(j != 7)
+                fwrite(&byte, sizeof(unsigned char), 1, file);
+                fclose(file);
+
+        }
+    }else{
+        printf("\n\nErro ao abrir/crair arquivo em compactar\n");
+    }
+}
 int main(void)
 {
     unsigned char text[] = "teste";
@@ -316,4 +346,9 @@ int main(void)
     // 6 -- Decodificando o texto
     decodificado = decodificar(codificado, arvore);
     printf("\n\tTexto decodificado: %s\n", decodificado);
+    /*até aqui codificamos em formato de string, a ideia agora é transformar uma cadeia de 8 caractéres em um unico byte*/
+
+    // 7 -- Criar arquivo COMPACTADO
+
+
 }
