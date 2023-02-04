@@ -188,13 +188,13 @@ char ** aloca_dicionario(int colunas){
     dicionario = malloc(sizeof(char*) * TAM);
     if(!dicionario){
         printf("\n\tNao foi possivel alocar espaço");
-        return;
+        return 0;
     }else{
         for( i=0 ; i<TAM ; i++){
             dicionario[i] = calloc(colunas, sizeof(char));
             if(!dicionario[i]){
                 printf("\n\t Nao foi possivel alocar espaco");
-                return;
+                return 0;
             }
         }
         return dicionario;    
@@ -240,7 +240,7 @@ char *codificar(char ** dicionario, unsigned char *texto){
     char *codigo = calloc(tam, sizeof(char));
     if(!codigo){
         printf("Nao foi possivel alocar espaco");
-        return;
+        return 0;
     }
 
     while(texto[i] != '\0'){
@@ -258,7 +258,7 @@ char *decodificar(unsigned char texto[], NODE *raiz){
    
     if(!decodificado){
         printf("\nnao foi possivel alocar espaco");
-        return;
+        return 0;
     }
     while(texto[i]){
         if(texto[i++] == '0'){
@@ -316,6 +316,7 @@ unsigned int eh_bit_um(unsigned char byte, int i){
 void descompactar(NODE *raiz){
     int i;
     NODE *aux = raiz;
+    unsigned char byte = 0;
     FILE *file = fopen("compactado.cpt", "rb");
     if(file){
         while(fread(&byte, sizeof(unsigned char), 1, file)){
@@ -332,17 +333,60 @@ void descompactar(NODE *raiz){
         }
         fclose(file);
     } else{
-        printf("\nErro ao abrir arquivo em desccompactar\n")
+        printf("\nErro ao abrir arquivo em desccompactar\n");
     }
+}
+
+int descobrir_tamanho(){
+    FILE *arq = fopen("teste.txt", "r");
+    int tam = 0;
+    if(arq){
+        while(fgetc(arq) != -1)
+            tam++;
+        fclose(arq);
+    }else
+        printf("\nErro ao abrir arquivo em descobrir_tamanho \n");
+
+    return tam;
+}
+
+void ler_texto(unsigned char *texto){
+    FILE *arq = fopen("teste.txt", "r");
+    char letra;
+    int i=0;
+    if(arq){
+        while(!feof(arq)){
+            letra = fgetc(arq);
+            if(letra != -1){
+                texto[i++] = letra;
+            }
+        }
+        fclose(arq);
+    }else
+        printf("\nErro ao abrir arquivo em ler texto\n");
+
+}
+void clear_dicionario(char ** dicionario){
+
+}
+void clear_arvore(NODE * arvore){
+
 }
 int main(void)
 {
-    unsigned char text[] = "teste";
-    unsigned int tabela_frequencia[TAM];
+    //unsigned char text[] = "teste";
+    unsigned char * text;
+    unsigned int tabela_frequencia[TAM], tam;
     char **dicionario;
     int colunas;
     char *codificado;
     char *decodificado;
+
+    tam = descobrir_tamanho();
+    printf("\nQuantidade; %d\n", tam);
+    text = calloc(tam+2, sizeof(unsigned char));
+    ler_texto(text);
+    printf("\nTEXTO\n%s\n", text);
 
     // 1 -- tabela de frequencia
     inicializa_tabela_com_zero(&tabela_frequencia);
@@ -377,6 +421,16 @@ int main(void)
     /*até aqui codificamos em formato de string, a ideia agora é transformar uma cadeia de 8 caractéres em um unico byte*/
 
     // 7 -- Criar arquivo COMPACTADO
+    compactar(codificado);
 
-    // 8 -- Lendo arquivo COMPACTADO
+    // 8 -- Descompactando arquivo
+    printf("\nARQUIVO DESCOMPACTADO!\n");
+    descompactar(arvore);
+    printf("\n\n");
+
+    free(text);
+    free(codificado);
+    free(decodificado);
+    clear_dicionario(dicionario);
+    clear_arvore(arvore);
 }
