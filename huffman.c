@@ -1,35 +1,42 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #define TAM 256
 
 // ESTRUTURA fila ORDENADA
-typedef struct node {
+typedef struct node
+{
     unsigned char caracter;
     unsigned int freq;
-    struct node * next;
-    struct node * right;
-    struct node * left;
+    struct node *next;
+    struct node *right;
+    struct node *left;
 } NODE;
 
-typedef struct {
-    NODE *  inicio;
+typedef struct
+{
+    NODE *inicio;
     unsigned int tam;
 } LISTA;
 
 // 1 -- tabela de frequencia
+
+// inicializa a tabela com zeros
 void inicializa_tabela_com_zero(unsigned int *t)
 {
     for (int i = 0; i < TAM; i++)
         t[i] = 0;
 }
 
+// preenche a tabela com a frequencia de cada caracter
 void preenche_tab_frequencia(unsigned int *t, char *text)
 {
-    for(int i = 0; text[i]; i++)
+    for (int i = 0; text[i]; i++)
         t[text[i]]++;
 }
 
+// imprime a tabela de frequencia
 void imprime_tab_frequencia(unsigned int *t)
 {
     for (int i = 0; i < TAM; i++)
@@ -40,51 +47,56 @@ void imprime_tab_frequencia(unsigned int *t)
 
 // 2 -- lista encadeada ordenada
 
-NODE * get_next_node (NODE * N) {
-    return N->next;
-}
-
-void criar_lista (LISTA * L) {
+// cria a lista
+void criar_lista(LISTA *L)
+{
     L->inicio = NULL;
     L->tam = 0;
 }
 
-void inserir_ordenado (LISTA * L, NODE * N) {
+// insere ordenado na lista encadeada
+void inserir_ordenado(LISTA *L, NODE *N)
+{
     // lista nao vazia
-    if(L->inicio){
+    if (L->inicio)
+    {
         // tem frequencia menor do que o inicio da lista (novo primeiro)
-        if(N->freq < L->inicio->freq){
+        if (N->freq < L->inicio->freq)
+        {
             N->next = L->inicio;
             L->inicio = N;
         }
         // tem frequencia maior do que o inicio da lista (insercao no meio ou fim)
-        else {
-            NODE * aux = L->inicio;
+        else
+        {
+            NODE *aux = L->inicio;
             // substituir abaixo por aux e aux->next
-            while(get_next_node(aux) && get_next_node(aux)->freq < N->freq)
-                aux = aux->next;    
+            while (aux->next && aux->next->freq < N->freq)
+                aux = aux->next;
             N->next = aux->next;
             aux->next = N;
         }
     }
     // lista vazia
-    else {
-      L->inicio = N;  
+    else
+    {
+        L->inicio = N;
     }
     L->tam++;
 }
 
-/*
-     Procedimento para preencher a lista a partir da tabela de frequência
-*/
-
-void preencher_lista (unsigned int * tabela, LISTA * L) {
+// preenche a lista com os caracteres e suas frequencias
+void preencher_lista(unsigned int *tabela, LISTA *L)
+{
     int i;
-    NODE * new;
-    for(i = 0; i<TAM; i++){
-        if(tabela[i] > 0){
-            new = (NODE*) malloc(sizeof(NODE));
-            if(new){
+    NODE *new;
+    for (i = 0; i < TAM; i++)
+    {
+        if (tabela[i] > 0)
+        {
+            new = (NODE *)malloc(sizeof(NODE));
+            if (new)
+            {
 
                 new->caracter = i;
                 new->freq = tabela[i];
@@ -93,20 +105,24 @@ void preencher_lista (unsigned int * tabela, LISTA * L) {
                 new->next = NULL;
                 inserir_ordenado(L, new);
             }
-            else {
+            else
+            {
                 printf("\tErro ao alocar memoria em prencher_lista()!\n");
-                break; // o problema era o break
+                break;
             }
         }
     }
 }
 
-void print_list (LISTA * L) {
-    NODE * aux = L->inicio;
+// imprime a lista
+void print_list(LISTA *L)
+{
+    NODE *aux = L->inicio;
     printf("Imprimindo Lista!\n");
     printf("Tamanho: %d\n", L->tam);
     unsigned short int count = 0;
-    while(aux){
+    while (aux)
+    {
         printf("%u.\tchar: %c\toc:%u\t\n", ++count, aux->caracter, aux->freq);
         aux = aux->next;
     }
@@ -114,10 +130,14 @@ void print_list (LISTA * L) {
 
 
 // 3 -- Montagem da arvore a partir da fila/lista ordenada
-NODE * remove_no_inicio (LISTA *L){
-    NODE * aux = NULL;
 
-    if(L->inicio){
+// remove o primeiro elemento da lista 
+NODE *remove_no_inicio(LISTA *L)
+{
+    NODE *aux = NULL;
+
+    if (L->inicio)
+    {
         aux = L->inicio;
         L->inicio = aux->next;
         aux->next = NULL;
@@ -127,17 +147,18 @@ NODE * remove_no_inicio (LISTA *L){
     return aux;
 }
 
-/*
-     Procedimento para montar a árvore de huffman.
-*/
-NODE* montar_arvore(LISTA *lista){
+// monta a arvore a partir da lista ordenada
+NODE *montar_arvore(LISTA *lista)
+{
     NODE *primeiro, *segundo, *novo;
-    while(lista->tam > 1){
+    while (lista->tam > 1)
+    {
         primeiro = remove_no_inicio(lista);
         segundo = remove_no_inicio(lista);
         novo = malloc(sizeof(NODE));
 
-        if(novo){
+        if (novo)
+        {
             novo->caracter = '+';
             novo->freq = primeiro->freq + segundo->freq;
             novo->left = primeiro;
@@ -146,7 +167,8 @@ NODE* montar_arvore(LISTA *lista){
 
             inserir_ordenado(lista, novo);
         }
-        else{
+        else
+        {
             printf("\n\tERRO ao alocar memoria em montar_arvore!\n");
             break;
         }
@@ -154,57 +176,58 @@ NODE* montar_arvore(LISTA *lista){
     return lista->inicio;
 }
 
-/*
-      Procedimento para imprimir na tela a árvore de huffman.
-*/
-void imprimir_arvore(NODE *raiz, int tam){
-    if(raiz->left == NULL && raiz->right == NULL)
+// imprime a arvore
+void imprimir_arvore(NODE *raiz, int tam)
+{
+    if (raiz->left == NULL && raiz->right == NULL)
         printf("\tFolha: %c\tAltura: %d\n", raiz->caracter, tam);
-    else{
+    else
+    {
         imprimir_arvore(raiz->left, tam + 1);
         imprimir_arvore(raiz->right, tam + 1);
     }
 }
+
 // ------------------  PARTE 4: Montar dicionario ------------------
 
-int altura_arvore(NODE *raiz){
+// retorna a altura da arvore (usado para alocar o dicionario)
+int altura_arvore(NODE *raiz)
+{
     int left, right;
-    if(!raiz)
+    if (!raiz)
         return -1;
-    else{
+    else
+    {
         left = altura_arvore(raiz->left) + 1;
         right = altura_arvore(raiz->right) + 1;
-        if(left > right)
+        if (left > right)
             return left;
         else
             return right;
     }
 }
 
-char ** aloca_dicionario(int colunas){
-    int i;
-    char ** dicionario;
-
-    dicionario = malloc(sizeof(char*) * TAM);
-    if(!dicionario){
-        printf("\n\tNao foi possivel alocar espaço");
-        return 0;
-    }else{
-        for( i=0 ; i<TAM ; i++){
-            dicionario[i] = calloc(colunas, sizeof(char));
-            if(!dicionario[i]){
-                printf("\n\t Nao foi possivel alocar espaco");
-                return 0;
-            }
-        }
-        return dicionario;    
+// aloca o dicionario
+char **aloca_dicionario(int colunas)
+{
+    char **dicionario = malloc(sizeof(char *) * TAM);
+    for (int i = 0; i < TAM; i++)
+    {
+        dicionario[i] = calloc(colunas, sizeof(char));
     }
+    return dicionario;
 }
-void gerar_dicionario(char **dicionario, NODE *raiz, char *caminho, int colunas){
+
+// gera o dicionario a partir da arvore
+void gerar_dicionario(char **dicionario, NODE *raiz, char *caminho, int colunas)
+{
     char esquerda[colunas], direita[colunas];
-    if(raiz->left == NULL && raiz->right == NULL){
+    if (raiz->left == NULL && raiz->right == NULL)
+    {
         strcpy(dicionario[raiz->caracter], caminho);
-    }else{
+    }
+    else
+    {
         strcpy(esquerda, caminho);
         strcpy(direita, caminho);
 
@@ -213,169 +236,191 @@ void gerar_dicionario(char **dicionario, NODE *raiz, char *caminho, int colunas)
 
         gerar_dicionario(dicionario, raiz->left, esquerda, colunas);
         gerar_dicionario(dicionario, raiz->right, direita, colunas);
+    }
+}
 
-    }
-}
-void imprime_dicionario(char **dicionario){
-    int i;
+// imprime o dicionario
+void imprime_dicionario(char **dicionario)
+{
     printf("\tDicionario:\n");
-    for(i=0 ; i<TAM ; i++){
-        if(strlen(dicionario[i]) > 0)
-        printf("\t%3d %s\n", i, dicionario[i]);
-    }
+    for (int i = 0; i < TAM; i++)
+        if (strlen(dicionario[i]) > 0)
+            printf("\t%3d %s\n", i, dicionario[i]);
 }
+
+
 // -------------------------- PARTE 5: Codificar -----------------------
 
-int calcula_tamanho_string(char ** dicionario, char *texto){
-    int i=0, tam = 0;
-    while(texto[i] != '\0'){
-        tam = tam + strlen(dicionario[texto[i++]]);
-    }
-    return tam+1;
+// retorna o tamanho do codigo do texto usando o dicionario passado como parametro
+int calcula_tamanho_string(char **dicionario, unsigned char *texto)
+{
+    int tam = 0;
+    for (int i = 0; texto[i]; i++)           // percorre o texto
+        tam += strlen(dicionario[texto[i]]); // soma o tamanho de cada codigo
+    return tam + 1;                          // caracteres + 1 fim de string
 }
-char *codificar(char ** dicionario, unsigned char *texto){
 
-    int i=0, tam = calcula_tamanho_string(dicionario, texto);
+// retorna o codigo do texto usando o dicionario passado como parametro
+char *codificar(char **dicionario, unsigned char *texto)
+{
+    int tam = calcula_tamanho_string(dicionario, texto); // calcula o tamanho do codigo
+    char *codigo = calloc(tam, sizeof(char));            // reserva espaco para o codigo
 
-    char *codigo = calloc(tam, sizeof(char));
-    if(!codigo){
-        printf("Nao foi possivel alocar espaco");
-        return 0;
-    }
+    for (int i = 0; texto[i]; i++)            // percorre o texto
+        strcat(codigo, dicionario[texto[i]]); // concatena o codigo
 
-    while(texto[i] != '\0'){
-        strcat(codigo, dicionario[texto[i++]]);
-    }
-    return codigo;
+    return codigo; // retorna o codigo
 }
 
 // --------------------- PARTE 6: Decodificacao ----------------------
-char *decodificar(unsigned char texto[], NODE *raiz){
-    int i=0;
-    NODE *aux = raiz;
-    char temp[2];
-    char *decodificado = calloc(strlen(texto), sizeof(char));
-   
-    if(!decodificado){
-        printf("\nnao foi possivel alocar espaco");
-        return 0;
-    }
-    while(texto[i]){
-        if(texto[i++] == '0'){
+
+// retorna o texto decodificado usando a arvore passada como parametro
+
+char *decodificar(unsigned char *codigo, NODE *raiz)
+{
+    NODE *aux = raiz;                                          // auxiliar para percorrer a arvore
+    char *decodificado = calloc(strlen(codigo), sizeof(char)); // reserva espaco para o texto decodificado
+    char temp[2];                                              // auxiliar para concatenar o caracter no texto decodificado
+
+    for (int i = 0; codigo[i]; i++)
+    {                         // percorre o codigo
+        if (codigo[i] == '0') // se for 0 vai para a esquerda
             aux = aux->left;
-        }else{
+        else // se for 1 vai para a direita
             aux = aux->right;
-        }
-        //verificar se chegou numa letra
-        if(!aux->left && !aux->right){
-            temp[0] = aux->caracter;
-            temp[1] = '\0';
-            strcat(decodificado, temp);
-            aux = raiz;
+        if (aux->left == NULL && aux->right == NULL)
+        {                               // se for uma folha
+            temp[0] = aux->caracter;    // pega o caracter
+            temp[1] = '\0';             // coloca o fim de string
+            strcat(decodificado, temp); // concatena o caracter no texto decodificado
+            aux = raiz;                 // volta para a raiz
         }
     }
-    return decodificado;
+    return decodificado; // retorna o texto decodificado
 }
+
 // ------------------- PARTE 7 : Compactar ----------------
 
-void compactar(unsigned char *str){
-    int i=0, j=7;
+void compactar(unsigned char *str)
+{
+    int i = 0, j = 7;
     unsigned char mascara, byte = 0;
     FILE *file = fopen("compactado.cpt", "wb");
-    
-    if(file){
-        while(str[i]){
+
+    if (file)
+    {
+        while (str[i])
+        {
             mascara = 1;
-            if(str[i++] == '1'){
+            if (str[i++] == '1')
+            {
                 mascara = mascara << j;
                 byte = byte | mascara;
             }
             j--;
 
-            if(j < 0){ // depois de manipular o byte de forma a formar o codigo parecido com o da string. Em seguida, mandamos o byte formado para o arquivo e reiniciamos o processo em busca de gerar o proximo byte.
+            if (j < 0)
+            { // depois de manipular o byte de forma a formar o codigo parecido com o da string. Em seguida, mandamos o byte formado para o arquivo e reiniciamos o processo em busca de gerar o proximo byte.
                 fwrite(&byte, sizeof(unsigned char), 1, file);
-                
+
                 byte = 0;
                 j = 7;
             }
-            if(j != 7)
+            if (j != 7)
                 fwrite(&byte, sizeof(unsigned char), 1, file);
-                fclose(file);
-
+            fclose(file);
         }
-    }else{
+    }
+    else
+    {
         printf("\n\nErro ao abrir/crair arquivo em compactar\n");
     }
 }
 
 // ------------------ parte 8: Descompactar --------------------
-unsigned int eh_bit_um(unsigned char byte, int i){
+unsigned int eh_bit_um(unsigned char byte, int i)
+{
     unsigned char mascara = (1 << i);
     return byte & mascara;
 }
-void descompactar(NODE *raiz){
+
+void descompactar(NODE *raiz)
+{
     int i;
     NODE *aux = raiz;
     unsigned char byte = 0;
     FILE *file = fopen("compactado.cpt", "rb");
-    if(file){
-        while(fread(&byte, sizeof(unsigned char), 1, file)){
-            for(i = 7; i >= 0; i--){
-                if(eh_bit_um(byte, i))
+    if (file)
+    {
+        while (fread(&byte, sizeof(unsigned char), 1, file))
+        {
+            for (i = 7; i >= 0; i--)
+            {
+                if (eh_bit_um(byte, i))
                     aux = aux->right;
                 else
                     aux = aux->left;
             }
-            if(!aux->left && !aux->right){
-                printf("%c",aux->caracter);
+            if (!aux->left && !aux->right)
+            {
+                printf("%c", aux->caracter);
                 aux = raiz;
             }
         }
         fclose(file);
-    } else{
+    }
+    else
+    {
         printf("\nErro ao abrir arquivo em desccompactar\n");
     }
 }
 
-int descobrir_tamanho(){
+int descobrir_tamanho()
+{
     FILE *arq = fopen("teste.txt", "r");
     int tam = 0;
-    if(arq){
-        while(fgetc(arq) != -1)
+    if (arq)
+    {
+        while (fgetc(arq) != -1)
             tam++;
         fclose(arq);
-    }else
+    }
+    else
         printf("\nErro ao abrir arquivo em descobrir_tamanho \n");
 
     return tam;
 }
 
-void ler_texto(unsigned char *texto){
-    FILE *arq = fopen("teste.txt", "r");
+void ler_texto(unsigned char *texto)
+{
+    FILE *arq = fopen("input.txt", "r");
     char letra;
-    int i=0;
-    if(arq){
-        while(!feof(arq)){
+    int i = 0;
+    if (arq)
+    {
+        while (!feof(arq))
+        {
             letra = fgetc(arq);
-            if(letra != -1){
+            if (letra != -1)
+            {
                 texto[i++] = letra;
             }
         }
         fclose(arq);
-    }else
+    }
+    else
         printf("\nErro ao abrir arquivo em ler texto\n");
-
 }
-void clear_dicionario(char ** dicionario){
-
+void clear_dicionario(char **dicionario)
+{
 }
-void clear_arvore(NODE * arvore){
-
+void clear_arvore(NODE *arvore)
+{
 }
+
 int main(void)
 {
-    //unsigned char text[] = "teste";
-    unsigned char * text;
+    unsigned char *text;
     unsigned int tabela_frequencia[TAM], tam;
     char **dicionario;
     int colunas;
@@ -384,7 +429,7 @@ int main(void)
 
     tam = descobrir_tamanho();
     printf("\nQuantidade; %d\n", tam);
-    text = calloc(tam+2, sizeof(unsigned char));
+    text = calloc(tam + 2, sizeof(unsigned char));
     ler_texto(text);
     printf("\nTEXTO\n%s\n", text);
 
@@ -400,13 +445,13 @@ int main(void)
     print_list(&list);
 
     // 3 -- Montagem da arvore a partir da lista/fila ordenada
-    NODE * arvore;
+    NODE *arvore;
     arvore = montar_arvore(&list);
     printf("\n\tImprimindo arvore de huffman\n");
     imprimir_arvore(arvore, 0);
 
     // 4 -- Montagem do dicionario para o algoritmo
-    colunas = altura_arvore(arvore)+1;
+    colunas = altura_arvore(arvore) + 1;
     dicionario = aloca_dicionario(colunas);
     gerar_dicionario(dicionario, arvore, "", colunas);
     imprime_dicionario(dicionario);
@@ -418,19 +463,20 @@ int main(void)
     // 6 -- Decodificando o texto
     decodificado = decodificar(codificado, arvore);
     printf("\n\tTexto decodificado: %s\n", decodificado);
+
     /*até aqui codificamos em formato de string, a ideia agora é transformar uma cadeia de 8 caractéres em um unico byte*/
 
     // 7 -- Criar arquivo COMPACTADO
-    compactar(codificado);
+    // compactar(codificado);
 
     // 8 -- Descompactando arquivo
-    printf("\nARQUIVO DESCOMPACTADO!\n");
-    descompactar(arvore);
-    printf("\n\n");
+    // printf("\nARQUIVO DESCOMPACTADO!\n");
+    // descompactar(arvore);
+    // printf("\n\n");
 
-    free(text);
-    free(codificado);
-    free(decodificado);
-    clear_dicionario(dicionario);
-    clear_arvore(arvore);
+    // free(text);
+    // free(codificado);
+    // free(decodificado);
+    // clear_dicionario(dicionario);
+    // clear_arvore(arvore);
 }
