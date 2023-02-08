@@ -327,10 +327,11 @@ void compactar(unsigned char *str)
                 byte = 0;
                 j = 7;
             }
-            if (j != 7)
+            
+        }
+        if (j != 7)
                 fwrite(&byte, sizeof(unsigned char), 1, file);
             fclose(file);
-        }
     }
     else
     {
@@ -349,7 +350,7 @@ void descompactar(NODE *raiz)
 {
     int i;
     NODE *aux = raiz;
-    unsigned char byte = 0;
+    unsigned char byte;
     FILE *file = fopen("compactado.cpt", "rb");
     if (file)
     {
@@ -361,12 +362,14 @@ void descompactar(NODE *raiz)
                     aux = aux->right;
                 else
                     aux = aux->left;
+
+                if (!aux->left && !aux->right)
+                {
+                    printf("%c", aux->caracter);
+                    aux = raiz;
+                }
             }
-            if (!aux->left && !aux->right)
-            {
-                printf("%c", aux->caracter);
-                aux = raiz;
-            }
+            
         }
         fclose(file);
     }
@@ -378,7 +381,7 @@ void descompactar(NODE *raiz)
 
 int descobrir_tamanho()
 {
-    FILE *arq = fopen("teste.txt", "r");
+    FILE *arq = fopen("input.txt", "r");
     int tam = 0;
     if (arq)
     {
@@ -469,16 +472,16 @@ int main(void)
     cadeia de 8 caractéres em um unico byte*/
 
     // 7 -- Criar arquivo COMPACTADO
-    // compactar(codificado);
+     compactar(codificado);
 
     // 8 -- Descompactando arquivo
-    // printf("\nARQUIVO DESCOMPACTADO!\n");
-    // descompactar(arvore);
-    // printf("\n\n");
+     printf("\nARQUIVO DESCOMPACTADO!\n");
+     descompactar(arvore);
+     printf("\n\n");
 
-    // free(text);
-    // free(codificado);
-    // free(decodificado);
-    // clear_dicionario(dicionario);
-    // clear_arvore(arvore);
+     free(text);
+     free(codificado);
+     free(decodificado);
+     clear_dicionario(dicionario);
+     clear_arvore(arvore);
 }
