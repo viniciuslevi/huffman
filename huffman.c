@@ -4,7 +4,7 @@
 
 #define TAM 256
 
-// ESTRUTURA fila ORDENADA
+// ESTRUTURA DOS NODOS
 typedef struct node
 {
     unsigned char caracter;
@@ -15,12 +15,11 @@ typedef struct node
 } NODE;
 
 // Estrutura da fila de prioridade
-typedef struct priority_queue
+typedef struct
 {
     NODE *front;
     unsigned int size;
 } PriorityQueue;
-
 
 // 1 -- tabela de frequencia
 
@@ -121,7 +120,6 @@ void print_queue(PriorityQueue *queue)
         aux = aux->next;
     }
 }
-
 
 // 3 -- Montagem da arvore a partir da fila de prioridade
 
